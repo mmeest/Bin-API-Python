@@ -92,6 +92,105 @@ btc_price = client.get_symbol_ticker(symbol="BTCUSDT")
 print(btc_price)
 ```
 
+To get exchange endpoint for example for 'BTCUSDT'
+'get_exchange_info' will return symbol pair result
+'get_symbol_info' will return single symbol result
+```
+import asyncio
+import json
+
+from binance import AsyncClient
+
+    async def main():
+    
+        client = await AsyncClient.create()
+        symbol_info = await client.get_symbol_info('BTCUSDT')
+    
+        print(json.dumps(symbol_info, indent=2))
+
+        await client.close_connection()
+    
+    if __name__ == "__main__":
+    
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(main())
+```
+
+This returns
+```
+    {
+      "symbol": "BTCUSDT",
+      "status": "TRADING",
+      "baseAsset": "BTC",
+      "baseAssetPrecision": 8,
+      "quoteAsset": "USDT",
+      "quotePrecision": 8,
+      "quoteAssetPrecision": 8,
+      "baseCommissionPrecision": 8,
+      "quoteCommissionPrecision": 8,
+      "orderTypes": [
+        "LIMIT",
+        "LIMIT_MAKER",
+        "MARKET",
+        "STOP_LOSS_LIMIT",
+        "TAKE_PROFIT_LIMIT"
+      ],
+      "icebergAllowed": true,
+      "ocoAllowed": true,
+      "quoteOrderQtyMarketAllowed": true,
+      "isSpotTradingAllowed": true,
+      "isMarginTradingAllowed": true,
+      "filters": [
+        {
+          "filterType": "PRICE_FILTER",
+          "minPrice": "0.01000000",
+          "maxPrice": "1000000.00000000",
+          "tickSize": "0.01000000"
+        },
+        {
+          "filterType": "PERCENT_PRICE",
+          "multiplierUp": "5",
+          "multiplierDown": "0.2",
+          "avgPriceMins": 5
+        },
+        {
+          "filterType": "LOT_SIZE",
+          "minQty": "0.00000100",
+          "maxQty": "9000.00000000",
+          "stepSize": "0.00000100"
+        },
+        {
+          "filterType": "MIN_NOTIONAL",
+          "minNotional": "10.00000000",
+          "applyToMarket": true,
+          "avgPriceMins": 5
+        },
+        {
+          "filterType": "ICEBERG_PARTS",
+          "limit": 10
+        },
+        {
+          "filterType": "MARKET_LOT_SIZE",
+          "minQty": "0.00000000",
+          "maxQty": "104.64146873",
+          "stepSize": "0.00000000"
+        },
+        {
+          "filterType": "MAX_NUM_ORDERS",
+          "maxNumOrders": 200
+        },
+        {
+          "filterType": "MAX_NUM_ALGO_ORDERS",
+          "maxNumAlgoOrders": 5
+        }
+      ],
+      "permissions": [
+        "SPOT",
+        "MARGIN"
+      ]
+    }
+```
+
 ### Buy order
 
 Example of test order. For live order use 'create_order' function instead of 'create_test_order'
@@ -231,3 +330,17 @@ except BinanceOrderException as e:
     # error handling goes here
     print(e)
 ```
+
+### Live orders
+
+To buy or sell all assets (BTC USD Example)
+```
+usdtBalance = client.get_asset_balance(asset='USDT').get('free')
+btcBalance = client.get_asset_balance(asset='BTC').get('free')
+
+order_buy = Client.order_market_buy(symbol='BTCUSDT', quantity=usdtBalance)
+
+order_sell = Client.order_market_sell(symbol='BTCUSDT', quantity=btcBalance)
+```
+
+This will throw Error because Binance takes 0.1 percent on every order
